@@ -22,7 +22,6 @@ class Reflection(object):
     @staticmethod
     def reflect_cls(module_path, class_name):
         import os
-        module  = None
         if os.path.isfile(module_path):
             module_spec = importlib.util.spec_from_file_location('reflection_module', module_path)
             reflection_module = importlib.util.module_from_spec(module_spec)

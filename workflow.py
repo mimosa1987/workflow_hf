@@ -35,14 +35,14 @@ from transformers import (
     set_seed,
 )
 import importlib
-from base.arguments import ModelArguments, DataTrainingArguments
+from base.arguments import ModelArguments, DataArguments
 from utils.reflection import Reflection
 logger = logging.getLogger(__name__)
 
 def workflow():
     # Get arguments
-    ModelArguments = Reflection.reflect_cls("ampha.base.arguments", "ModelArguments")
-    DataTrainingArguments = Reflection.reflect_cls("ampha.base.arguments", "DataTrainingArguments")
+    ModelArguments = Reflection.reflect_cls("base.arguments", "ModelArguments")
+    DataTrainingArguments = Reflection.reflect_cls("base.arguments", "DataTrainingArguments")
     TrainingArguments = Reflection.reflect_cls("transformers", "Seq2SeqTrainingArguments")
 
     parser = HfArgumentParser((ModelArguments, DataTrainingArguments, TrainingArguments))

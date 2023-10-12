@@ -32,6 +32,12 @@ class ModelArguments:
         default="main",
         metadata={"help": "The specific model version to use (can be a branch name, tag name or commit id)."},
     )
+    trust_remote_code: bool = field(
+        default=False, metadata={"help": "trust_remote_code"}
+    )
+    model_name_or_path: str = field(
+        default=None, metadata={"help": "Path to pretrained model or model identifier from huggingface.co/models"}
+    )
     use_auth_token: bool = field(
         default=False,
         metadata={
@@ -62,15 +68,23 @@ class ModelArguments:
 
 
 @dataclass
-class DataTrainingArguments:
+class DataArguments:
     """
     Arguments pertaining to what data we are going to input our model for training and eval.
     """
 
     lang: Optional[str] = field(default=None, metadata={"help": "Language id for summarization."})
 
+    data_cache_dir: Optional[str] = field(
+        default=None,
+        metadata={"help": "Where to store the data downloaded from huggingface.co"},
+    )
+
     dataset_name: Optional[str] = field(
         default=None, metadata={"help": "The name of the dataset to use (via the datasets library)."}
+    )
+    data_dir: Optional[str] = field(
+        default=None, metadata={"help": "The input data directory  jsonlines or csv file)."}
     )
     dataset_config_name: Optional[str] = field(
         default=None, metadata={"help": "The configuration name of the dataset to use (via the datasets library)."}
@@ -210,7 +224,7 @@ class DataTrainingArguments:
 
 
     def __post_init__(self):
-        if self.dataset_name is None and self.train_file is None and self.validation_file is None and self.test_file is None:
+        if self.data_dir is None and self.train_file is None and self.validation_file is None and self.test_file is None:
             raise ValueError("Need either a dataset name or a training/validation/test file.")
         else:
             if self.train_file is not None:

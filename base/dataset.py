@@ -1,22 +1,94 @@
 import glob
-import random
+import os.path
+
+from datasets import load_dataset
+from transformers import AutoTokenizer
 
 
-class BaseDataSet():
-    def __init__(self):
+class BaseDataSet:
+    def __init__(self, data_args, model_args, tokenizer=None, prompt=None):
+        self.train_files = None
+        self.eval_files = None
+        self.test_files = None
+        self.data_args = data_args
+        self.model_args = model_args
+        self.has_test = False
+        if tokenizer is None:
+            self.init_tokenizer()
+        else:
+            self.tokenizer = tokenizer
+
+        if prompt is None:
+            self.init_prompt()
+        else:
+            self.prompt = prompt
+
+    def init_tokenizer(self):
+        if self.model_args.tokenizer_name is not None:
+            self.tokenizer = AutoTokenizer.from_pretrained(self.model_args.tokenizer_name)
+        else:
+            self.tokenizer = AutoTokenizer.from_pretrained(self.model_args.model_name_or_path)
+
+    def init_prompt(self):
         pass
 
-class DirectoryDataSet(BaseDataSet):
-    def __init__(self):
-        super().__init__()
+    def _pre_load(self):
+        pass
 
-    def get_data(self, pathname, split = 'train', k = 10):
-        file_list = glob(pathname)
-        ext = file_list[0].split('.')[-1]
-        if split == 'all':
-            test_files = random.sample(file_list, k=k)
-            train_file = [i for i in file_list if i not in test_files]
-            return ext, {"train" : train_file, "valid" : test_files }
-        else:
-            return  ext, {split : file_list}
+    def load(self):
+        self._pre_process()
+        # 数据集梳理过程
+        # 1、加载数据集
+        # code for load data
 
+        # 2、prompt 处理
+        # code for prompt
+
+        # 3、tokenizer 处理
+        # code for tokenizer
+
+        self._post_process()
+        pass
+
+    def _post_load(self):
+        pass
+
+    def _check_dir(self, path_name):
+        if not os.path.isdir(path_name):
+            raise ValueError(f"{path_name} must be a folder!")
+        if not os.path.exists(os.path.join(path_name, 'train')) or len(
+                os.listdir(os.path.join(path_name, 'train'))) == 0:
+            raise ValueError(
+                f"There must be at least the train folder under the {path_name} folder and train folder must not be EMPTY!")
+        if not os.path.exists(os.path.join(path_name, 'eval')) or len(os.listdir(os.path.join(path_name, 'eval'))) == 0:
+            raise ValueError(
+                f"There must be at least the eval folder under the {path_name} folder and eval folder must not be EMPTY!")
+        if os.path.exists(os.path.join(path_name, 'test')):
+            return True
+        return False
+
+    def load_data_from_directory(self):
+        if self.data_args.data_dir is not None:
+            self.has_test = self._check_dir(self.data_args.data_dir)
+            train_dir = os.path.join(self.data_args.data_dir, 'train')
+            eval_dir = os.path.join(self.data_args.data_dir, 'eval')
+            self.train_files = glob.glob("%s/**" % train_dir)
+            self.eval_files = glob.glob("%s/**" % eval_dir)
+            if self.has_test:
+                test_dir = os.path.join(self.data_args.data_dir, 'test')
+                self.test_files = glob.glob("%s/**" % test_dir)
+            ext = self.train_files[0].split('.')[-1]
+            if self.has_test:
+                return load_dataset(
+                    ext,
+                    data_files={"train": self.train_files, "eval": self.eval_files, "test": self.test_files},
+                    cache_dir=self.model_args.cache_dir if self.data_args.data_cache_dir is None else self.data_args.data_cache_dir,
+                    use_auth_token=True if self.model_args.use_auth_token else None,
+                )
+            else:
+                return load_dataset(
+                    ext,
+                    data_files={"train": self.train_files, "eval": self.eval_files, "test": self.test_files},
+                    cache_dir=self.model_args.cache_dir,
+                    use_auth_token=True if self.model_args.use_auth_token else None,
+                )

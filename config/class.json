@@ -1,0 +1,38 @@
+{
+  "args": {
+    "model_args": {
+      "module": "custom.arguments.chatglm2",
+      "class": "CustomModelArguments"
+    },
+    "data_args": {
+      "module": "/Users/zhaolihan/Documents/personal/practice/dev/workflow_hf/base/arguments.py",
+      "class": "DataArguments"
+    },
+    "train_args": {
+      "module": "transformers",
+      "class": "Seq2SeqTrainingArguments"
+    }
+  },
+  "data": {
+    "input_data_class": {
+      "module": "custom.dataset.chatglm2",
+      "class": "ChatGLM2DataSet"
+    },
+    "prompt_class": {
+      "module": "custom.prompt.chatglm2",
+      "class": "ChatGLM2DataSet"
+    },
+    "tokenzier_class": {
+      "module": "custom.dataset.chatglm2",
+      "class": "ChatGLM2DataSet"
+    }
+  },
+  "model": {
+  },
+  "train": {
+    "trainer": {
+      "class": "",
+      "params": ""
+    }
+  }
+}
