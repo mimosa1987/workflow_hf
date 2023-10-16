@@ -1,18 +1,22 @@
-class BaseTokenizer:
-    def __init__(
-            self,
-            tokenizer_name_or_path,
-    ):
-        self.tokenizer_name_or_path = tokenizer_name_or_path
+from abc import abstractmethod
 
-    def _pre_tokeinze(self):
+from transformers import PreTrainedTokenizer
+
+
+class BaseTokenizer(PreTrainedTokenizer):
+    def __init__(self, padding_side='left', **kwargs):
+        super().__init__(padding_side=padding_side, **kwargs)
+
+    @abstractmethod
+    def _pre_tokenize(self):
         pass
 
-    def tokenize(self):
-        self._pre_tokeinze()
+    def tokenize_plus(self, text, **kwargs):
+        self._pre_tokenize()
         # tokenize
+        self.tokenize(text, **kwargs)
         self._post_tokenize()
-        pass
 
+    @abstractmethod
     def _post_tokenize(self):
         pass

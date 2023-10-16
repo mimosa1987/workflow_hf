@@ -4,11 +4,14 @@ import json
 import os
 import sys
 import logging
-from workflow.workflow_func import (
-    get_args,
-    set_job_log,
-    load_prompt,
-    load_tokenizer,
+from workflow.wf_func import (
+    set_job_log
+)
+
+from workflow.wf_cls import (
+    get_args_class,
+    get_prompt_class,
+    get_tokenizer_class,
     get_input_dataset_class,
 )
 
@@ -30,7 +33,7 @@ def run():
     logger.info(f"WorkFlow config : {workflow_cls_config}")
 
     # 获取作业参数配置
-    model_arguments_cls, data_arguments_cls, training_arguments_cls = get_args(workflow_cls_config)
+    model_arguments_cls, data_arguments_cls, training_arguments_cls = get_args_class(workflow_cls_config)
     parser = HfArgumentParser((model_arguments_cls, data_arguments_cls, training_arguments_cls))
 
     if len(sys.argv) == 2 and sys.argv[1].endswith(".json"):
@@ -55,23 +58,20 @@ def run():
 
     # 加载数据集
     # 获取 prompter 和 tokenizer
-    prompt = load_prompt()
-    tokenizer = load_tokenizer()
+    # prompt_cls = get_prompt_class()
+    tokenizer_cls = get_tokenizer_class(workflow_cls_config)
 
     data_cls = get_input_dataset_class(workflow_cls_config)
     data = data_cls(
         data_args=data_args,
         model_args=model_args,
-        ptompter=prompt,
-        tokenizer=tokenizer
-    ).load_data_from_directory()
+        # ptompt_cls=prompt_cls,
+        tokenizer_cls=tokenizer_cls
+    ).load()
     print(data)
 
 #   # 加载 Config
 #   model_config = get_config(model_args)
-#
-#   # 加载 Tonenizer
-#   tokenizer = get_tokenizer(model_args, data_args)
 #
 #   # 检查checkpoint
 #   is_exist_checkpoint, checkpoint = check_and_get_checkpoint()

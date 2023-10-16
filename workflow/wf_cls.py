@@ -1,30 +1,10 @@
 from utils.class_func import get_cls
-from utils.reflection import Reflection
-import sys
 import logging
-import transformers
 
 logger = logging.getLogger(__name__)
 
 
-def set_job_log(job_logger, train_args):
-    logging.basicConfig(
-        format="%(asctime)s - %(levelname)s - %(name)s - %(levelno)s - %(message)s",
-        datefmt="%m/%d/%Y %H:%M:%S",
-        handlers=[logging.StreamHandler(sys.stdout)],
-    )
-
-    if train_args.should_log:
-        # The default of training_args.log_level is passive, so we set log level at info here to have that default.
-        transformers.utils.logging.set_verbosity_info()
-    log_level = train_args.get_process_log_level()
-    job_logger.setLevel(log_level)
-    transformers.utils.logging.set_verbosity(log_level)
-    transformers.utils.logging.enable_default_handler()
-    transformers.utils.logging.enable_explicit_format()
-
-
-def get_args(workflow_config):
+def get_args_class(workflow_config):
     model_arguments_cls, data_arguments_cls, training_arguments_cls = _get_args_from_config(workflow_config)
     return model_arguments_cls, data_arguments_cls, training_arguments_cls
 
@@ -46,11 +26,18 @@ def _get_args_from_config(workflow_cls_config):
 def get_input_dataset_class(workflow_cls_config):
     dataset_conf = workflow_cls_config.get('data').get('input_data_class')
     dataset_cls = get_cls(dataset_conf)
+    logger.info(
+        f"Input dataset arguments class : {dataset_conf} \n ")
     return dataset_cls
 
 
-def load_prompt(workflow_cls_config):
-    pass
+def get_prompt_class(workflow_cls_config):
+    prompt_conf = workflow_cls_config.get('data').get('prompt_class')
+    prompt_cls = get_cls(prompt_conf)
+    return prompt_cls
 
-def load_tokenizer(workflow_cls_config):
-    pass
+
+def get_tokenizer_class(workflow_cls_config):
+    tokenize_conf = workflow_cls_config.get('data').get('tokenizer_class')
+    tokenize_cls = get_cls(tokenize_conf)
+    return tokenize_cls

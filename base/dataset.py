@@ -1,54 +1,60 @@
 import glob
 import os.path
-
 from datasets import load_dataset
 from transformers import AutoTokenizer
 
 
 class BaseDataSet:
-    def __init__(self, data_args, model_args, tokenizer=None, prompt=None):
+    def __init__(self, data_args, model_args, tokenizer_cls=None, prompt_cls=None):
         self.train_files = None
         self.eval_files = None
         self.test_files = None
         self.data_args = data_args
         self.model_args = model_args
         self.has_test = False
-        if tokenizer is None:
-            self.init_tokenizer()
+        if tokenizer_cls is None:
+            self.tokenizer_cls = AutoTokenizer
         else:
-            self.tokenizer = tokenizer
+            self.tokenizer_cls = tokenizer_cls
+        self.tokenizer = None
+        self.init_tokenizer()
 
-        if prompt is None:
+        if prompt_cls is None:
             self.init_prompt()
         else:
-            self.prompt = prompt
+            self.prompt_cls = prompt_cls
 
     def init_tokenizer(self):
-        if self.model_args.tokenizer_name is not None:
-            self.tokenizer = AutoTokenizer.from_pretrained(self.model_args.tokenizer_name)
-        else:
-            self.tokenizer = AutoTokenizer.from_pretrained(self.model_args.model_name_or_path)
+        tokenizer_name = self.model_args.tokenizer_name \
+            if self.model_args.tokenizer_name is not None \
+            else self.model_args.model_name_or_path
+        self.tokenizer = self.tokenizer_cls.from_pretrained(tokenizer_name)
 
     def init_prompt(self):
         pass
 
     def _pre_load(self):
-        pass
+        # 判断
+        if self.model_args.data_dir is not None:
+            self.load_type = 'dir'
 
     def load(self):
-        self._pre_process()
+        self._pre_load()
         # 数据集梳理过程
         # 1、加载数据集
         # code for load data
+        if self.load_type == 'dir':
+            data = self.load_data_from_directory()
 
         # 2、prompt 处理
         # code for prompt
-
+        data = self.prompt(prompt)
         # 3、tokenizer 处理
         # code for tokenizer
+        data = self.tokenizer(data)
 
-        self._post_process()
-        pass
+        self._post_load()
+        return data
 
     def _post_load(self):
         pass

@@ -22,9 +22,9 @@
       "module": "custom.prompt.chatglm2",
       "class": "ChatGLM2DataSet"
     },
-    "tokenzier_class": {
-      "module": "custom.dataset.chatglm2",
-      "class": "ChatGLM2DataSet"
+    "tokenizer_class": {
+      "module": "custom.tokenizer.chatglm2",
+      "class": "ChatGLM2Tokenizer"
     }
   },
   "model": {
