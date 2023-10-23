@@ -48,7 +48,7 @@ class BaseDataSet:
 
         # 2、prompt 处理
         # code for prompt
-        data = self.prompt(prompt)
+        data = self.prompt(data)
         # 3、tokenizer 处理
         # code for tokenizer
         data = self.tokenizer(data)
